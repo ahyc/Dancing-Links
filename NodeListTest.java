@@ -2,16 +2,33 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.stream.Stream;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.ArrayList;
+import java.util.Queue;
+import java.util.ArrayDeque;
 
 public class NodeListTest {
   public static NodeList nodeList;
 
+  // Method to print the grid from the file:
   private static void printGrid(String[][] array) {
-    System.out.println();
+    System.out.println("The grid is as follows:");
     for(int row = 0; row < array.length; row++) {
       for(int col = 0; col < array[0].length; col++) {
         System.out.printf(array[row][col] + " ");
       }
+      System.out.println();
+    }
+    System.out.println();
+  }
+
+  // Method to print the nodes of each row in the grid:
+  private static void printGridNodes(Map<Integer, ArrayList<Integer>> rowNodes) {
+    System.out.println("The grid nodes are as follows: ");
+    for (Map.Entry<Integer, ArrayList<Integer>> entry : rowNodes.entrySet()) {
+      System.out.printf("Row: " + entry.getKey() + ", Columns: ");
+      entry.getValue().forEach(colIndex -> System.out.printf(nodeList.getColumnName(colIndex) + " "));
       System.out.println();
     }
     System.out.println();
@@ -25,57 +42,34 @@ public class NodeListTest {
     try(Stream<String> lines = Files.lines(Paths.get(fileName))) {
       array = lines.map(line -> line.split("\\s++"))
                         .toArray(String[][]::new);
-      printGrid(array);
 
+      // Add column nodes to the right of the linked list:
       char colName = 'A';
       for(int col = 0; col < array[0].length; col++) {
         nodeList.addColumnNode(String.valueOf(colName));
         colName++;
       }
 
-      for(int row = 0; row < array.length; row++) {
-        Node first = null;    Node leftNode = null;
-        for(int col = 0; col < array[0].length; col++) {
+      // Add row nodes to the circular doubly linked list:
+      Map<Integer, ArrayList<Integer>> rowNodes = new HashMap<Integer, ArrayList<Integer>>();
+      Queue<Integer> queue = new ArrayDeque<Integer>();
+  	  for(int row = 0; row < array.length; row++) {
+    		for(int col = 0; col < array[0].length; col++) {
+    			if(array[row][col].equals("1"))
+    				queue.add(col);
+    		}
+        rowNodes.put((row), new ArrayList<Integer>(queue));
+    		nodeList.addRowNodes(queue);
+  	  }
 
-          if(array[row][col].equals("1")) {
-            if(first == null) {
-              nodeList.addRowNode(nodeList.getColumn(col));
-              first = nodeList.getRow(nodeList.getColumn(col), row);
-              leftNode = first;
-            }
-            else {
-              nodeList.addRowNode(nodeList.getColumn(col), first, leftNode);
-              leftNode = nodeList.getRow(nodeList.getColumn(col), row);
-            }
+      // printGrid(array);
+      printGridNodes(rowNodes);
+      // nodeList.printColumnSizes();
 
-          }
-        }
-      }
+      nodeList.solve();
 
-      nodeList.print();
     } catch (IOException e) {
       e.printStackTrace();
     }
-
-
-    //
-    // nodeList.addColumnNode("A");
-    // nodeList.addColumnNode("B");
-    // nodeList.addColumnNode("C");
-    //
-    // nodeList.print();
-    // System.out.println(nodeList.getCounter());
-    //
-    // nodeList.addRowNode(nodeList.getColumn(0));
-    //
-    // nodeList.addRowNode(nodeList.getColumn(2), nodeList.getRow(nodeList.getColumn(0), 0), nodeList.getRow(nodeList.getColumn(0), 0));
-    //
-    // nodeList.addRowNode(nodeList.getColumn(0));
-    //
-    // nodeList.addRowNode(nodeList.getColumn(1), nodeList.getRow(nodeList.getColumn(0), 1), nodeList.getRow(nodeList.getColumn(0), 1));
-    //
-    // nodeList.print();
-    //
-    // System.out.println(nodeList.getRowNames(nodeList.getColumn(0), 0));
   }
 }
