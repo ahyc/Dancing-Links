@@ -17,7 +17,6 @@ java sudoku
 ## Notes
 - To run the code on a new grid, create a new `.txt` file and place in the `SudokuGrids` folder. The `.txt` file should replace *all blank cells* with **'0'**
 - To run the code on a specific grid, add the file name when running the code: e.g.
-```java
-java sudoku sudoku1.txt
-```
+`java sudoku sudoku1.txt
+
 
